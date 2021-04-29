@@ -102,7 +102,6 @@ public class Reporter {
                                      BigInteger msg,
                                      OAEP oaep){
 //        TODO: understand the decryption process
-        byte[] seed = new byte[32];     // 32 from OAEP size
         try{
             String decodedMsg = oaep.decode(msg.modPow(d, n));
             return decodedMsg;
