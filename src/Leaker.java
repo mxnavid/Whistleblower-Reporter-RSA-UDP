@@ -30,27 +30,18 @@
 // either version 3 of the License, or (at your option) any later version.
 //******************************************************************************
 
-import javax.swing.*;
-import javax.xml.crypto.Data;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.net.*;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class Leaker {
-    private String rHost;
-    private int rPort;
-    private String lHost;
-    private int lPort;
-
-
-
     public static void main(String[] args) {
-        if (args.length < 6) argsError();
+        if (args.length < 6) argMissing();
         String rHost = args[0];
         int rPort = Integer.parseInt(args[1]);
         InetSocketAddress reportAdd = null;
@@ -74,10 +65,6 @@ public class Leaker {
             System.err.printf("Can't bind with the given address %s:%d \n", lHost, lPort);
             argsError();
         }
-
-
-
-
 
 //        FileInputStream publicKeyFile
         Scanner sc = null;
@@ -110,11 +97,6 @@ public class Leaker {
             System.exit(1);
 
         }
-
-
-
-
-
     }
 
     public static BigInteger encryptedMsg(BigInteger e,
@@ -122,7 +104,7 @@ public class Leaker {
                                                    String msg,
                                                  OAEP oaep){
         byte[] seed = genSeed(32);
-//        System.out.println(seed);
+
         BigInteger P = oaep.encode(msg, seed);
         BigInteger encryptedMsg = P.modPow(e, n);
         return encryptedMsg;
@@ -130,12 +112,17 @@ public class Leaker {
     private static byte[] genSeed(int seedSize){
         byte[] seed = new byte[seedSize];
 
-        Arrays.fill(seed, (byte) 0);
+        Arrays.fill(seed, (byte) 0);        // fill the array with 0
         return seed;
     }
 
+    public static void argMissing(){
+        System.err.println("Missing arguments");
+        argsError();
+    }
+
     public static void argsError(){
-        System.err.println("java Leaker <rhost> <rport> <lhost> <lport> <publickeyfile> <message>");
+        System.err.println("Usage: java Leaker <rhost> <rport> <lhost> <lport> <publickeyfile> <message>");
         System.exit(1);
     }
 }

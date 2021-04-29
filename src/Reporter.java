@@ -43,7 +43,7 @@ import java.util.Scanner;
 
 public class Reporter {
     public static void main(String[] args) throws SocketException {
-        if (args.length < 3 ) argsError();
+        if (args.length < 3 ) argMissing();
 
         String rHost = args[0];
         int rPort = Integer.parseInt(args[1]);
@@ -65,17 +65,21 @@ public class Reporter {
             sc = new Scanner(privateKeyFile);
         }catch (FileNotFoundException e){
             e.printStackTrace();
-            System.err.printf("Private key not found, please try again: %s.\n", args[2]);
-            argsError();
+            System.err.println("Error: nosuchfile (No such file or directory)\n");
+            System.exit(1);
         }
 
+        // TODO: handle if modulus or exponent missing
         //convert to big integer
         String dStr = sc.nextLine();
         String nStr = sc.nextLine();
+
+
         OAEP oaep = new OAEP();
 
         BigInteger d = new BigInteger(dStr);
         BigInteger n = new BigInteger(nStr);
+
 
         byte[] buffer = new byte[260];
         BigInteger incomingMsg;
@@ -83,7 +87,6 @@ public class Reporter {
             try{
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 mailbox.receive(packet);
-//            TODO: Figure out the incoming buffer
                 byte[] incomingBuffer = packet.getData();
                 BigInteger msg = new BigInteger(incomingBuffer, 0, packet.getLength());
                 String output = decryption(d, n, msg, oaep);
@@ -92,8 +95,6 @@ public class Reporter {
                 e.printStackTrace();
             }
         }
-
-
     }
 
 
@@ -101,7 +102,6 @@ public class Reporter {
                                      BigInteger n,
                                      BigInteger msg,
                                      OAEP oaep){
-//        TODO: understand the decryption process
         try{
             String decodedMsg = oaep.decode(msg.modPow(d, n));
             return decodedMsg;
@@ -112,6 +112,12 @@ public class Reporter {
         }
         return "";
     }
+
+    public static void argMissing(){
+        System.err.println("Missing arguments");
+        argsError();
+    }
+
     public static void argsError(){
         System.err.println("Usage: java Reporter <rhost> <rport> <privatekeyfile>");
         System.exit(1);
