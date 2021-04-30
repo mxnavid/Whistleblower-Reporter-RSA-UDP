@@ -38,17 +38,33 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Scanner;
 
-
+/**
+ * Class Reporter is the reporter main program which will receive encrypted
+ * messages from the leakers and try to decrypt them using the private
+ * key file and show the output as the standard output.
+ *
+ * Usage: java Reporter <rhost> <rport> <privatekeyfile>
+ * @author Navid Nafiuzzaman
+ * @version Apr 29, 2021
+ */
 public class Reporter {
-    private static BigInteger d;
-    private static BigInteger n;
-    private static DatagramSocket mailbox = null;
-    public static void main(String[] args) {
-        if (args.length < 3 ) argMissing();
+    //Data Members
+    private static BigInteger d;        // decimal val of the private key
+    private static BigInteger n;        // modulus val of the private key
+    private static DatagramSocket mailbox = null;   // mailbox
 
-        String rHost = args[0];
+    /**
+     * Main program taking multiple user inputs and starting the reporter
+     * program to decrypt the received messages from user.
+     * @param args User arguments from the user.
+     */
+    public static void main(String[] args) {
+        if (args.length < 3 ) argMissing();     // if less than 3 args, there is error
+
+        String rHost = args[0];                 // reporter host
         int rPort = Integer.parseInt(args[1]);
 
+        // creates the mailbox
         try{
             mailbox = new DatagramSocket(new InetSocketAddress(rHost, rPort));
         }catch (SocketException e){
@@ -58,9 +74,9 @@ public class Reporter {
             System.exit(1);
         }
 
-        // handling privatekeyFile
-        Scanner sc = null;
-        File privateKeyFile = new File(args[2]);
+        // handling private key File
+        Scanner sc = null;                              // creates a scanner
+        File privateKeyFile = new File(args[2]);        //creates a file
         try{
             sc = new Scanner(privateKeyFile);
         }catch (FileNotFoundException e){
@@ -69,8 +85,8 @@ public class Reporter {
         }
 
         //convert to big integer
-        String dStr = null;
-        String nStr = null;
+        String dStr = null;                             // create a decimal str
+        String nStr = null;                             // creates a modulus str
         try{
             dStr = sc.nextLine();
         }catch (Exception e){
@@ -78,6 +94,7 @@ public class Reporter {
             System.exit(1);
         }
 
+        // tries to read the string from the private key file
         try{
             nStr = sc.nextLine();
 
@@ -94,6 +111,7 @@ public class Reporter {
             System.exit(1);
         }
 
+        // converts the strings to BigInteger decimal and modulus.
         try{
             n = new BigInteger(nStr);
         } catch (NumberFormatException e){
@@ -101,21 +119,27 @@ public class Reporter {
             System.exit(1);
         }
 
-        OAEP oaep = new OAEP();
+        OAEP oaep = new OAEP();                     // creates the OAEP object from pj2
         LeakerProxy proxy = new LeakerProxy(mailbox, d, n, oaep);
-        proxy.startProxy();
+        proxy.startProxy();                         // starts the threaded proxy prog
     }
 
 
+    /**
+     * Function showing the missing arguments error
+     */
     public static void argMissing(){
         System.err.println("Missing arguments");
         argsError();
     }
 
+
+    /**
+     * Function showing the usage error message
+     */
     public static void argsError(){
         System.err.println("Usage: java Reporter <rhost> <rport> <privatekeyfile>");
         System.exit(1);
     }
-
 
 }
