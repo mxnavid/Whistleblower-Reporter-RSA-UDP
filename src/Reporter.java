@@ -44,10 +44,7 @@ import java.util.Scanner;
 public class Reporter {
     private static BigInteger d;
     private static BigInteger n;
-    private static Thread reporterThread;
-
     private static DatagramSocket mailbox = null;
-
     public static void main(String[] args) throws SocketException {
         if (args.length < 3 ) argMissing();
 
