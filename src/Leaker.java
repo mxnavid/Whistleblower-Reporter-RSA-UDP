@@ -83,32 +83,34 @@ public class Leaker {
         BigInteger e = new BigInteger(dStr);
         BigInteger n = new BigInteger(nStr);
 
-
-
         String message = args[5];
 
         BigInteger encryptedMsg = encryptedMsg(e,n, message, oaep);
         byte[] outputByteArr = encryptedMsg.toByteArray();
-        try{
-            socket.send(new DatagramPacket(outputByteArr, outputByteArr.length, reportAdd));
-        } catch (IOException io){
-            io.printStackTrace();
-            System.err.println("I can't send package \n");
-            System.exit(1);
 
+        ReporterProxy proxy = new ReporterProxy( socket, reportAdd);
+
+        try {
+            proxy.reportMsg(outputByteArr);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+            System.err.println("Error: Leaker unable to send package \n");
+            System.exit(1);
         }
+
     }
 
     public static BigInteger encryptedMsg(BigInteger e,
-                                                   BigInteger n,
-                                                   String msg,
-                                                 OAEP oaep){
+                                          BigInteger n,
+                                          String msg,
+                                          OAEP oaep){
         byte[] seed = genSeed(32);
 
         BigInteger P = oaep.encode(msg, seed);
         BigInteger encryptedMsg = P.modPow(e, n);
         return encryptedMsg;
     }
+
     private static byte[] genSeed(int seedSize){
         byte[] seed = new byte[seedSize];
         Arrays.fill(seed, (byte) 0);        // fill the array with 0

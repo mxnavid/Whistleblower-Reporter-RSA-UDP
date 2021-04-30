@@ -82,41 +82,11 @@ public class Reporter {
         n = new BigInteger(nStr);
         OAEP oaep = new OAEP();
 
-        Thread thread = new Thread("New Thread"){
-            public void run(){
-                byte[] buffer = new byte[260];
-                while (true){
-                    try{
-                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                        mailbox.receive(packet);
-                        byte[] incomingBuffer = packet.getData();
-                        BigInteger msg = new BigInteger(incomingBuffer, 0, packet.getLength());
-                        String output = decryption(d, n, msg, oaep);
-                        System.out.println(output);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-        thread.start();
 
+        LeakerProxy proxy = new LeakerProxy(mailbox, d, n, oaep);
+        proxy.startProxy();
+    }
 
-    }
-    private static String decryption(BigInteger d,
-                                     BigInteger n,
-                                     BigInteger msg,
-                                     OAEP oaep){
-        try{
-            String decodedMsg = oaep.decode(msg.modPow(d, n));
-            return decodedMsg;
-        } catch (IllegalArgumentException e){
-            e.printStackTrace();
-            System.err.println("Private key cannot decrypt the message sent using public key");
-            System.exit(1);
-        }
-        return "";
-    }
 
     public static void argMissing(){
         System.err.println("Missing arguments");
