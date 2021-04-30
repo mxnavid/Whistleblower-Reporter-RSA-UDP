@@ -32,9 +32,7 @@
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -45,7 +43,7 @@ public class Reporter {
     private static BigInteger d;
     private static BigInteger n;
     private static DatagramSocket mailbox = null;
-    public static void main(String[] args) throws SocketException {
+    public static void main(String[] args) {
         if (args.length < 3 ) argMissing();
 
         String rHost = args[0];
@@ -66,23 +64,44 @@ public class Reporter {
         try{
             sc = new Scanner(privateKeyFile);
         }catch (FileNotFoundException e){
-            e.printStackTrace();
-            System.err.println("Error: nosuchfile (No such file or directory)\n");
+            System.err.println("Error: nosuchfile (No such file or directory)");
             System.exit(1);
         }
 
-        // TODO: handle if modulus or exponent missing
         //convert to big integer
-        String dStr = sc.nextLine();
-        String nStr = sc.nextLine();
+        String dStr = null;
+        String nStr = null;
+        try{
+            dStr = sc.nextLine();
+        }catch (Exception e){
+            System.err.println("Decimal text missing");
+            System.exit(1);
+        }
 
+        try{
+            nStr = sc.nextLine();
 
+        }catch (Exception e){
+            System.err.println("Modulus text missing");
+            System.exit(1);
+        }
 
-        d = new BigInteger(dStr);
-        n = new BigInteger(nStr);
+        try{
+            d = new BigInteger(dStr);
+
+        } catch (NumberFormatException e){
+            System.err.println("Couldn't read decimal value in private key file");
+            System.exit(1);
+        }
+
+        try{
+            n = new BigInteger(nStr);
+        } catch (NumberFormatException e){
+            System.err.println("Couldn't read modulus value in private key file");
+            System.exit(1);
+        }
+
         OAEP oaep = new OAEP();
-
-
         LeakerProxy proxy = new LeakerProxy(mailbox, d, n, oaep);
         proxy.startProxy();
     }

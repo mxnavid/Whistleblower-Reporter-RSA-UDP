@@ -2,11 +2,12 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
 
 public class LeakerProxy {
-    private DatagramSocket mailbox;
-    private LeakerListener leakerListener;
+    private final DatagramSocket mailbox;
+    private final BigInteger d;
+    private final BigInteger n;
+    private final OAEP oaep;
 
     public LeakerProxy(DatagramSocket mailbox, BigInteger d, BigInteger n, OAEP oaep) {
         this.mailbox = mailbox;
@@ -15,13 +16,6 @@ public class LeakerProxy {
         this.oaep = oaep;
     }
 
-    private BigInteger d;
-    private BigInteger n;
-    private OAEP oaep;
-
-    public LeakerProxy(DatagramSocket mailbox) {
-        this.mailbox = mailbox;
-    }
 
     public void startProxy (){
         new ReaderThread().start();
