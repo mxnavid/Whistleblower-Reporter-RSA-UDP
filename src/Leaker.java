@@ -111,7 +111,6 @@ public class Leaker {
     }
     private static byte[] genSeed(int seedSize){
         byte[] seed = new byte[seedSize];
-
         Arrays.fill(seed, (byte) 0);        // fill the array with 0
         return seed;
     }

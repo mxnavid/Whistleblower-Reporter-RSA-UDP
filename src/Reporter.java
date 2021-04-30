@@ -42,12 +42,17 @@ import java.util.Scanner;
 
 
 public class Reporter {
+    private static BigInteger d;
+    private static BigInteger n;
+    private static Thread reporterThread;
+
+    private static DatagramSocket mailbox = null;
+
     public static void main(String[] args) throws SocketException {
         if (args.length < 3 ) argMissing();
 
         String rHost = args[0];
         int rPort = Integer.parseInt(args[1]);
-        DatagramSocket mailbox = null;
 
         try{
             mailbox = new DatagramSocket(new InetSocketAddress(rHost, rPort));
@@ -75,29 +80,32 @@ public class Reporter {
         String nStr = sc.nextLine();
 
 
+
+        d = new BigInteger(dStr);
+        n = new BigInteger(nStr);
         OAEP oaep = new OAEP();
 
-        BigInteger d = new BigInteger(dStr);
-        BigInteger n = new BigInteger(nStr);
-
-
-        byte[] buffer = new byte[260];
-        BigInteger incomingMsg;
-        while (true){
-            try{
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                mailbox.receive(packet);
-                byte[] incomingBuffer = packet.getData();
-                BigInteger msg = new BigInteger(incomingBuffer, 0, packet.getLength());
-                String output = decryption(d, n, msg, oaep);
-                System.out.println(output);
-            } catch (IOException e) {
-                e.printStackTrace();
+        Thread thread = new Thread("New Thread"){
+            public void run(){
+                byte[] buffer = new byte[260];
+                while (true){
+                    try{
+                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                        mailbox.receive(packet);
+                        byte[] incomingBuffer = packet.getData();
+                        BigInteger msg = new BigInteger(incomingBuffer, 0, packet.getLength());
+                        String output = decryption(d, n, msg, oaep);
+                        System.out.println(output);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }
+        };
+        thread.start();
+
+
     }
-
-
     private static String decryption(BigInteger d,
                                      BigInteger n,
                                      BigInteger msg,
